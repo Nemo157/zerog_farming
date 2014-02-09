@@ -301,7 +301,7 @@ def generate_override_modfile mod, override_mod_path
   override_mod_name = mod.name ? mod.name + '_gravityless_plants' : 'gravityless_plants'
   JsonFile.get(File.join(override_mod_path, override_mod_name + '.modinfo'), override_mod_path).tap do |override_mod|
     override_mod.name = override_mod_name
-    override_mod.version = mod.version || 'Beta v. Furious Koala',
+    override_mod.version = mod.version || 'Beta v. Furious Koala'
     override_mod.dependencies = [ mod.name ] if mod.exists?
     override_mod.path = mod.path || '.'
     override_mod.metadata = OpenStruct.new({
