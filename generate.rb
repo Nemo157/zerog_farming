@@ -1,10 +1,14 @@
 #!/usr/bin/env ruby
 
+require 'bundler/setup'
+
 require 'optparse'
 require 'ostruct'
 require 'json'
 require 'pathname'
 require 'RMagick'
+
+require_relative 'config'
 
 options = OpenStruct.new
 options.input = []
@@ -298,17 +302,17 @@ def generate_plant_overrides plant, override_mod
 end
 
 def generate_override_modfile mod, override_mod_path
-  override_mod_name = mod.name ? mod.name + '_gravityless_plants' : 'gravityless_plants'
+  override_mod_name = mod.exists? ? "#{mod.name}_#{$config.suffix}" : $config.suffix
   JsonFile.get(File.join(override_mod_path, override_mod_name + '.modinfo'), override_mod_path).tap do |override_mod|
     override_mod.name = override_mod_name
-    override_mod.version = mod.version || 'Beta v. Furious Koala'
+    override_mod.version = mod.version || $config.default_starbound_version
     override_mod.dependencies = [ mod.name ] if mod.exists?
     override_mod.path = mod.path || '.'
     override_mod.metadata = OpenStruct.new({
-      version: '0.1.1',
-      author: 'Nemo157',
-      description: "Gravityless plants for #{mod.name}",
-      support_url: 'https://github.com/Nemo157/gravityless_plants'
+      version: $config.version,
+      author: $config.author,
+      description: mod.exists? ? "#{$config.description} for #{mod.name}" : $config.description,
+      support_url: $config.support_url
     })
   end
 end
@@ -316,7 +320,11 @@ end
 @output_files = []
 puts "Outputting all mods to #{options.output}"
 options.input.map { |mod_path| find_modfile File.absolute_path mod_path }.each do |mod|
-  override_mod_path = File.absolute_path(File.join(options.output, "#{File.basename mod.glpg_metadata.root_path}_gravityless_plants"))
+  if mod.exists?
+    override_mod_path = File.absolute_path(File.join(options.output, "#{File.basename mod.glpg_metadata.root_path}_#{$config.suffix}"))
+  else
+    override_mod_path = File.absolute_path(File.join(options.output, $config.suffix))
+  end
   rmrf override_mod_path
   override_mod = generate_override_modfile mod, override_mod_path
   @output_files << override_mod
