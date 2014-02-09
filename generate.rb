@@ -261,6 +261,7 @@ def generate_plant_override plant, override_mod, images, image_options
       frames: 1,
       animationCycle: 0.5,
       spaceScan: 0.1,
+      requireSoilAnchors: true,
       requireTilledAnchors: false,
       spaces: (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [x, -y] } },
       anchors: [ "top" ]
@@ -270,6 +271,7 @@ def generate_plant_override plant, override_mod, images, image_options
       frames: 1,
       animationCycle: 0.5,
       spaceScan: 0.1,
+      requireSoilAnchors: true,
       requireTilledAnchors: false,
       spaces: (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [-y, x] } },
       fgAnchors: (0...(plant.glpg_metadata.width)).map { |val| [1, val] }
@@ -279,6 +281,7 @@ def generate_plant_override plant, override_mod, images, image_options
       frames: 1,
       animationCycle: 0.5,
       spaceScan: 0.1,
+      requireSoilAnchors: true,
       requireTilledAnchors: false,
       spaces: (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [y, x] } },
       fgAnchors: (0...(plant.glpg_metadata.width)).map { |val| [-1, val] }
