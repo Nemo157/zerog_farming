@@ -187,7 +187,7 @@ def generate_frame_overrides frames, override_mod
     downwards.frameGrid = OpenStruct.new({
       size: frames.frameGrid.size,
       dimensions: frames.frameGrid.dimensions,
-      names: frames.frameGrid.names
+      names: frames.frameGrid.names.map { |row| row.reverse }.reverse
     })
     downwards.aliases = frames.aliases
   end
@@ -305,7 +305,7 @@ def generate_override_modfile mod, override_mod_path
     override_mod.dependencies = [ mod.name ] if mod.exists?
     override_mod.path = mod.path || '.'
     override_mod.metadata = OpenStruct.new({
-      version: '0.1',
+      version: '0.1.1',
       author: 'Nemo157',
       description: "Gravityless plants for #{mod.name}",
       support_url: 'https://github.com/Nemo157/gravityless_plants'
