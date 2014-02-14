@@ -254,7 +254,7 @@ def generate_plant_override plant, override_mod, images, image_options
     object_override.orientations = [
       plant.orientations.first.tap do |top|
         top[:spaces] = (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [x, y] } }
-        top[:anchors] = nil
+        top.delete_field(:anchors)
         top[:fgAnchors] = (0...(plant.glpg_metadata.width)).map { |val| [val, -1] }
       end,
     {
