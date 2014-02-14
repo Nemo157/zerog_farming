@@ -254,6 +254,8 @@ def generate_plant_override plant, override_mod, images, image_options
     object_override.orientations = [
       plant.orientations.first.tap do |top|
         top[:spaces] = (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [x, y] } }
+        top[:anchors] = nil
+        top[:fgAnchors] = (0...(plant.glpg_metadata.width)).map { |val| [val, -1] }
       end,
     {
       dualImage: "#{Pathname.new(images.downwards.glpg_metadata.path).relative_path_from(Pathname.new(File.dirname(file_path)))}:#{image_options}",
@@ -264,7 +266,7 @@ def generate_plant_override plant, override_mod, images, image_options
       requireSoilAnchors: true,
       requireTilledAnchors: false,
       spaces: (0...(plant.glpg_metadata.height)).flat_map { |y| (0...(plant.glpg_metadata.width)).map { |x| [x, -y] } },
-      anchors: [ "top" ]
+      fgAnchors: (0...(plant.glpg_metadata.width)).map { |val| [val, 1] }
     }, {
       image: "#{Pathname.new(images.leftwards.glpg_metadata.path).relative_path_from(Pathname.new(File.dirname(file_path)))}:#{image_options}",
       imagePosition: [-((plant.glpg_metadata.height - 1) * 8), 0],
