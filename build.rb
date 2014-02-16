@@ -17,8 +17,10 @@ $default_assets_pak = File.join($starbound_dir, 'assets/packed.pak')
 $temp_path = File.absolute_path(File.join(File.dirname(__FILE__), 'temp'))
 $output_path = File.absolute_path(File.join(File.dirname(__FILE__), 'output', $config.version))
 
-$mods_to_override = %w{soy caffeine Starbooze cotton Ore_Farming1_6 BetterMerchants0.07}
-$mods_to_override << 'Ore Farming 1.7'
+$mods = Dir.entries(File.join($starbound_dir, 'mods')).reject { |path| path == '.' || path == '..' || path.include?('zerog') }.map { |path| File.join($starbound_dir, 'mods', path) }
+$mods += Dir.entries($extra_mods_dir).reject { |path| path == '.' || path == '..' || path.include?('zerog') }.map { |path| File.join($extra_mods_dir, path) }
+
+$mods = $mods.select { |path| Dir["#{path}/**/*.modinfo"].any? }
 
 def rmrf path
   if File.file? path
@@ -33,19 +35,6 @@ def mkdirp path
   unless File.exists? path
     mkdirp File.dirname path
     Dir.mkdir path
-  end
-end
-
-def find_mod mod
-  paths = [
-    File.join($starbound_dir, 'mods', mod),
-    File.join($extra_mods_dir, mod)
-  ]
-  found = paths.select { |path| File.exists? path }.first
-  if found
-    found
-  else
-    raise StandardError, "Cannot find mod #{mod} in any of #{paths.map { |path| "'#{path}'"} * ', '}"
   end
 end
 
@@ -89,12 +78,18 @@ end
 File.rename File.join($temp_path, $config.suffix, "#{$config.suffix}.modinfo"), File.join($temp_path, $config.suffix, 'pak.modinfo')
 system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, $config.suffix), File.join($output_path, "#{$config.suffix}.modpak")
 
-system 'ruby', File.join(File.dirname(__FILE__), 'generate.rb'), *$mods_to_override.flat_map { |mod| [ '-i', unpack_if_needed(find_mod(mod)) ] }, '-o', $temp_path
-$mods_to_override.each do |mod|
-  File.delete File.join($output_path, "#{mod}_#{$config.suffix}.zip") if File.exists? File.join($output_path, "#{mod}_#{$config.suffix}.zip")
-  Dir.chdir $temp_path do
-    system 'zip', '-q', '-r', File.join($output_path, "#{mod}_#{$config.suffix}.zip"), "#{mod}_#{$config.suffix}"
+system 'ruby', File.join(File.dirname(__FILE__), 'generate.rb'), *$mods.flat_map { |mod| [ '-i', unpack_if_needed(mod) ] }, '-o', $temp_path
+$mods.each do |mod_path|
+  mod = File.basename(mod_path)
+  override = "#{mod}_#{$config.suffix}"
+  if Dir["#{File.join($temp_path, override)}/**/*"].length < 2
+    puts "Skipping packaging #{override} as it is empty"
+  else
+    File.delete File.join($output_path, "#{override}.zip") if File.exists? File.join($output_path, "#{override}.zip")
+    Dir.chdir $temp_path do
+      system 'zip', '-q', '-r', File.join($output_path, "#{override}.zip"), "#{mod}_#{$config.suffix}"
+    end
+    File.rename Dir[File.join($temp_path, override, '*.modinfo')].first, File.join($temp_path, override, 'pak.modinfo')
+    system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, override), File.join($output_path, "#{override}.modpak")
   end
-  File.rename Dir[File.join($temp_path, "#{mod}_#{$config.suffix}", '*.modinfo')].first, File.join($temp_path, "#{mod}_#{$config.suffix}", 'pak.modinfo')
-  system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, "#{mod}_#{$config.suffix}"), File.join($output_path, "#{mod}_#{$config.suffix}.modpak")
 end
