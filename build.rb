@@ -18,6 +18,7 @@ $temp_path = File.absolute_path(File.join(File.dirname(__FILE__), 'temp'))
 $output_path = File.absolute_path(File.join(File.dirname(__FILE__), 'output', $config.version))
 
 $mods_to_override = %w{soy caffeine Starbooze cotton Ore_Farming1_6 BetterMerchants0.07}
+$mods_to_override << 'Ore Farming 1.7'
 
 def rmrf path
   if File.file? path
