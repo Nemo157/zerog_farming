@@ -52,7 +52,7 @@ end
 
 def unpack_if_needed mod
   if Dir["#{mod}/**/*.pak"].any?
-    unpacked_path = File.join($temp_path, 'inputs', File.basename(mod))
+    unpacked_path = File.join($temp_path, File.basename(mod))
     rmrf unpacked_path
     cp_without_pak mod, unpacked_path
     Dir["#{mod}/**/*.pak"].each do |pak|
