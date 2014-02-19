@@ -1,7 +1,7 @@
 require 'ostruct'
 
 $config = OpenStruct.new({
-  version: '0.1.5',
+  version: '0.2.1',
   author: 'Nemo157',
   suffix: 'zerog_farming',
   description: 'Zero-G Farming',
