@@ -310,7 +310,7 @@ def generate_override_modfile mod, override_mod_path
   override_mod_name = mod.exists? ? "#{mod.name}_#{$config.suffix}" : $config.suffix
   JsonFile.get(File.join(override_mod_path, override_mod_name + '.modinfo'), override_mod_path).tap do |override_mod|
     override_mod.name = override_mod_name
-    override_mod.version = mod.version || $config.default_starbound_version
+    override_mod.version = $config.starbound_version
     override_mod.dependencies = [ mod.name ] if mod.exists?
     override_mod.path = mod.path || '.'
     override_mod.metadata = OpenStruct.new({
@@ -331,6 +331,10 @@ options.input.map { |mod_path| find_modfile File.absolute_path mod_path }.each d
     override_mod_path = File.absolute_path(File.join(options.output, $config.suffix))
   end
   rmrf override_mod_path
+  if mod.exists? and mod.version != $config.starbound_version
+    puts "Skipping #{File.basename mod.glpg_metadata.root_path}/#{mod.name} as it's for #{mod.version} not #{$config.starbound_version}"
+    next
+  end
   override_mod = generate_override_modfile mod, override_mod_path
   @output_files << override_mod
   puts "Generating #{File.basename override_mod_path}/#{override_mod.name} to override #{File.basename mod.glpg_metadata.root_path}/#{mod.name}"
