@@ -35,6 +35,7 @@ $files.each do |file|
   if $release_info.include? File.basename(file)
     puts "#{File.basename file} already released for #{$tag}"
   else
+    puts "Uploading #{File.basename file} for #{$tag}"
     `github-release upload \
         --repo zerog_farming \
         --tag '#{$tag}' \
