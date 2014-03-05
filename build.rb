@@ -20,7 +20,7 @@ $output_path = File.absolute_path(File.join(File.dirname(__FILE__), 'output', $c
 $mods = Dir.entries(File.join($starbound_dir, 'mods')).reject { |path| path == '.' || path == '..' || path.include?('zerog') }.map { |path| File.join($starbound_dir, 'mods', path) }
 $mods += Dir.entries($extra_mods_dir).reject { |path| path == '.' || path == '..' || path.include?('zerog') }.map { |path| File.join($extra_mods_dir, path) }
 
-$mods = $mods.select { |path| Dir["#{path}/**/*.modinfo"].any? }
+$mods = $mods.select { |path| path.end_with?('.modpak') or Dir["#{path}/**/*.modinfo"].any? }
 
 def rmrf path
   if File.file? path
@@ -51,7 +51,13 @@ def cp_without_pak src, dst
 end
 
 def unpack_if_needed mod
-  if Dir["#{mod}/**/*.pak"].any?
+  if mod.end_with? '.modpak'
+    puts "Unpacking #{mod}"
+    unpacked_path = File.join($temp_path, File.basename(mod, '.modpak'))
+    rmrf unpacked_path
+    system File.join($starbound_bin_dir, 'asset_unpacker'), mod, unpacked_path
+    unpacked_path
+  elsif Dir["#{mod}/**/*.pak"].any?
     unpacked_path = File.join($temp_path, File.basename(mod))
     rmrf unpacked_path
     cp_without_pak mod, unpacked_path
@@ -72,6 +78,7 @@ mkdirp $output_path
 system File.join($starbound_bin_dir, 'asset_unpacker'), $default_assets_pak, File.join($temp_path, 'default_assets')
 system 'ruby', File.join(File.dirname(__FILE__), 'generate.rb'), '-i', File.join($temp_path, 'default_assets'), '-o', $temp_path
 File.delete File.join($output_path, "#{$config.suffix}.zip") if File.exists? File.join($output_path, "#{$config.suffix}.zip")
+File.delete File.join($output_path, "#{$config.suffix}.modpak") if File.exists? File.join($output_path, "#{$config.suffix}.modpak")
 Dir.chdir $temp_path do
   system 'zip', '-q', '-r', File.join($output_path, "#{$config.suffix}.zip"), $config.suffix
 end
@@ -80,12 +87,13 @@ system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, $con
 
 system 'ruby', File.join(File.dirname(__FILE__), 'generate.rb'), *$mods.flat_map { |mod| [ '-i', unpack_if_needed(mod) ] }, '-o', $temp_path
 $mods.each do |mod_path|
-  mod = File.basename(mod_path)
+  mod = File.basename(mod_path, '.modpak')
   override = "#{mod}_#{$config.suffix}"
   if Dir["#{File.join($temp_path, override)}/**/*"].length < 2
     puts "Skipping packaging #{override} as it is empty"
   else
     File.delete File.join($output_path, "#{override}.zip") if File.exists? File.join($output_path, "#{override}.zip")
+    File.delete File.join($output_path, "#{override}.modpak") if File.exists? File.join($output_path, "#{override}.modpak")
     Dir.chdir $temp_path do
       system 'zip', '-q', '-r', File.join($output_path, "#{override}.zip"), "#{mod}_#{$config.suffix}"
     end
