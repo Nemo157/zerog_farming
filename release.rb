@@ -20,11 +20,11 @@ end
 `git push --tags`
 
 puts "Creating release"
-$release_info = `github-release info -r zerog_farming | awk '/^-.*/ { echo = 0 } /^- #{Regexp.quote $tag}/ { echo = 1 } { if (echo == 1) { print } }'`
+$release_info = `github-release info -r zerog_farming | awk '/^-.*/ { echo = 0 } /^- #{Regexp.quote $tag}, name/ { echo = 1 } { if (echo == 1) { print } }'`.chomp
 if $release_info.empty?
   `github-release release \
       --repo zerog_farming \
-      --tag '#{$tag} \
+      --tag '#{$tag}' \
       --name '#{$name}'`
 else
   puts "Release #{$name} already exists"
@@ -32,7 +32,7 @@ end
 
 puts "Uploading files"
 $files.each do |file|
-  if $release_info.include? File.basename(file)
+  if $release_info.include? File.basename(file).gsub(' ', '.')
     puts "#{File.basename file} already released for #{$tag}"
   else
     puts "Uploading #{File.basename file} for #{$tag}"
