@@ -297,7 +297,7 @@ def generate_plant_overrides plant, override_mod
   image = BinaryFile.get File.absolute_path(File.join(File.dirname(plant.glpg_metadata.path), image_path)), plant.glpg_metadata.root_path
 
   if not image.data
-    raise "Could not load image '#{image.glpg_metadata.path}' for plant override"
+    raise "Could not load image '#{image_path}' for plant override"
   end
 
   frames = JsonFile.get File.join(File.dirname(plant.glpg_metadata.path), File.basename(image_path, File.extname(image_path)) + ".frames"), plant.glpg_metadata.root_path
