@@ -9,7 +9,7 @@ $name = "#{$config.starbound_version} - Release #{$config.version.split('.').las
 $output_path = File.absolute_path(File.join(File.dirname(__FILE__), 'output', $config.version))
 $files = Dir.entries($output_path).reject { |path| path == '.' || path == '..' }.map { |path| File.join($output_path, path) }
 
-$files = $files.reject { |file| file.end_with?('.DS_Store') or file.end_with?('.modpak') }
+$files = $files.reject { |file| file.end_with?('.DS_Store') }
 
 puts "Tagging release"
 if `git tag`.include? $tag

@@ -77,11 +77,7 @@ mkdirp $output_path
 
 system File.join($starbound_bin_dir, 'asset_unpacker'), $default_assets_pak, File.join($temp_path, 'default_assets')
 system 'ruby', File.join(File.dirname(__FILE__), 'generate.rb'), '-i', File.join($temp_path, 'default_assets'), '-o', $temp_path
-File.delete File.join($output_path, "#{$config.suffix}.zip") if File.exists? File.join($output_path, "#{$config.suffix}.zip")
 File.delete File.join($output_path, "#{$config.suffix}.modpak") if File.exists? File.join($output_path, "#{$config.suffix}.modpak")
-Dir.chdir $temp_path do
-  system 'zip', '-q', '-r', File.join($output_path, "#{$config.suffix}.zip"), $config.suffix
-end
 File.rename File.join($temp_path, $config.suffix, "#{$config.suffix}.modinfo"), File.join($temp_path, $config.suffix, 'pak.modinfo')
 system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, $config.suffix), File.join($output_path, "#{$config.suffix}.modpak")
 
@@ -92,11 +88,7 @@ $mods.each do |mod_path|
   if Dir["#{File.join($temp_path, override)}/**/*"].length < 2
     puts "Skipping packaging #{override} as it is empty"
   else
-    File.delete File.join($output_path, "#{override}.zip") if File.exists? File.join($output_path, "#{override}.zip")
     File.delete File.join($output_path, "#{override}.modpak") if File.exists? File.join($output_path, "#{override}.modpak")
-    Dir.chdir $temp_path do
-      system 'zip', '-q', '-r', File.join($output_path, "#{override}.zip"), "#{mod}_#{$config.suffix}"
-    end
     File.rename Dir[File.join($temp_path, override, '*.modinfo')].first, File.join($temp_path, override, 'pak.modinfo')
     system File.join($starbound_bin_dir, 'asset_packer'), File.join($temp_path, override), File.join($output_path, "#{override}.modpak")
   end
