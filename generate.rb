@@ -296,6 +296,10 @@ def generate_plant_overrides plant, override_mod
   image_path, image_options = image_details.split(':')
   image = BinaryFile.get File.absolute_path(File.join(File.dirname(plant.glpg_metadata.path), image_path)), plant.glpg_metadata.root_path
 
+  if not image.data
+    raise "Could not load image '#{image.glpg_metadata.path}' for plant override"
+  end
+
   frames = JsonFile.get File.join(File.dirname(plant.glpg_metadata.path), File.basename(image_path, File.extname(image_path)) + ".frames"), plant.glpg_metadata.root_path
   plant.glpg_metadata.width = (frames.frameGrid.size[0] / 8.0).ceil
   plant.glpg_metadata.height = (frames.frameGrid.size[1] / 8.0).ceil
@@ -339,8 +343,13 @@ options.input.map { |mod_path| find_modfile File.absolute_path mod_path }.each d
   @output_files << override_mod
   puts "Generating #{File.basename override_mod_path}/#{override_mod.name} to override #{File.basename mod.glpg_metadata.root_path}/#{mod.name}"
   find_plants(mod).each do |plant|
-    generate_plant_overrides(plant, override_mod).each do |file|
-      @output_files << file
+    begin
+      generate_plant_overrides(plant, override_mod).each do |file|
+        @output_files << file
+      end
+    rescue
+      puts "Error generating override for '#{plant.glpg_metadata.path}':"
+      puts "  #{$!}"
     end
   end
 end
