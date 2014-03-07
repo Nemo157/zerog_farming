@@ -32,7 +32,7 @@ end
 
 puts "Uploading files"
 $files.each do |file|
-  if $release_info.include? File.basename(file).gsub(' ', '.')
+  if $release_info.include? File.basename(file).gsub(/[\(\) ]+/, '.')
     puts "#{File.basename file} already released for #{$tag}"
   else
     puts "Uploading #{File.basename file} for #{$tag}"
